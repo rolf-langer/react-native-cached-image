@@ -4,7 +4,7 @@ const _ = require('lodash');
 const URL = require('url-parse');
 const SHA1 = require("crypto-js/sha1");
 
-const defaultImageTypes = ['png', 'jpeg', 'jpg', 'gif', 'bmp', 'tiff', 'tif', 'mov', 'mp4', 'avi', 'wmv'];
+const defaultImageTypes = ['png', 'jpeg', 'jpg', 'gif', 'bmp', 'tiff', 'tif', 'mov', 'mp4', 'avi', 'wmv', 'aac', 'mp3', 'wav'];
 
 function serializeObjectKeys(obj) {
     return _(obj)
