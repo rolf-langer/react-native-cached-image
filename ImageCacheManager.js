@@ -23,6 +23,49 @@ module.exports = (defaultOptions = {}, urlCache = MemoryCache, fs = fsUtils, pat
         return _.isString(url) && (_.startsWith(url.toLowerCase(), 'http://') || _.startsWith(url.toLowerCase(), 'https://'));
     }
 
+    // Promise to query local cache for url.
+    // Returns filePath if entry exists, otherwise returns null.
+    // Caution: If queried file is expired, it will be deleted!
+    function urlQuery (url, options) {
+        // allow CachedImage to provide custom options
+        _.defaults(options, defaultOptions);
+        // cacheableUrl contains only the needed query params
+        const cacheableUrl = path.getCacheableUrl(url, options.useQueryParamsInCacheKey)
+        return new Promise((resolve, reject) => {
+            urlCache.get(cacheableUrl)
+                .then(fileRelativePath => {
+                    if (!fileRelativePath) {
+                        // Url is currently NOT in cache or has expired..
+                        // cleanup: try to delete local file if it still exists
+                        const relativePath = path.getImageRelativeFilePath(cacheableUrl)
+                        const filePath = `${options.cacheLocation}/${relativePath}`
+                        fs.deleteFile(filePath)
+                        return resolve(null)
+                    }
+                      // console.log('ImageCacheManager: url cache hit', cacheableUrl);
+                    const cachedFilePath = `${options.cacheLocation}/${fileRelativePath}`
+                    return fs.exists(cachedFilePath)
+                        .then((exists) => {
+                          if (exists) {
+                            return resolve(cachedFilePath)
+                          // If the file doesn't exist: remove the entry and resolve null!
+                          } else {
+                            urlCache.remove(cacheableUrl)
+                            return resolve(null)
+                          }
+                        })
+              })
+              // url is not found in the cache or is expired
+              // cleanup: try to delete local file if it still exists
+              .catch(() => {
+                const relativePath = path.getImageRelativeFilePath(cacheableUrl)
+                const filePath = `${options.cacheLocation}/${relativePath}`
+                fs.deleteFile(filePath)
+                return resolve(null)
+              })
+        })
+    }
+
     function cacheUrl(url, options, getCachedFile) {
         if (!isCacheable(url)) {
             return Promise.reject(new Error('Url is not cacheable'));
@@ -79,6 +122,19 @@ module.exports = (defaultOptions = {}, urlCache = MemoryCache, fs = fsUtils, pat
                 url,
                 options,
                 filePath => fs.downloadFile(url, filePath, options.headers)
+            );
+        },
+
+        /**
+         * download an image and cache the result according to the given options
+         * @param url
+         * @param options
+         * @returns {Promise}
+         */
+        queryUrl(url, options = {}) {
+            return urlQuery(
+                url,
+                options
             );
         },
 
