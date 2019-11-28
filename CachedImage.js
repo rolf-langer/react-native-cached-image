@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const React = require('react');
 const ReactNative = require('react-native');
+const NetInfo = require('@react-native-community/netinfo');
 
 const PropTypes = require('prop-types');
 
@@ -19,7 +20,6 @@ const {
     Platform,
     StyleSheet,
 } = ReactNative;
-import NetInfo from "@react-native-community/netinfo";
 
 const styles = StyleSheet.create({
     image: {
