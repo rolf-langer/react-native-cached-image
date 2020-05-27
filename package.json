@@ -51,7 +51,7 @@
     "crypto-js": "3.1.9-1",
     "lodash": "^4.17.10",
     "prop-types": "15.5.10",
-    "react-native-clcasher": "1.0.0",
+    "react-native-clcasher": "https://github.com/mitevdev/react-native-clcasher.git#39cf14d96ddf6d76632d20e1db2609b1dbc52067",
     "rn-fetch-blob": "^0.10.11",
     "url-parse": "^1.4.1"
   },
